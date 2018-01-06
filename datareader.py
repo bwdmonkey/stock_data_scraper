@@ -1,22 +1,28 @@
-import pandas_datareader as pdr
+'''
+Script made to import data from yahoo finance
+Exports CSV files from 2012/1/1 to datetime.today()
+'''
 from datetime import datetime
-import json
 
-SYMBOLS = ['XIC.TO', 'VUS.TO', 'VSB.TO', 'ZEF.TO', 'VEF.TO', 'VEE.TO', 'VRE.TO', 'XEN.TO', 'DSI', 'CLF.TO', 'ESGD', 'ESGE', 'REET']
+import csv
+import pandas_datareader as pdr
 
-for symbol in SYMBOLS:
-  data = pdr.get_data_yahoo(symbols=symbol, start=datetime(2012,1,1), end=datetime.today())
-  # print data['Date'] + ', ' + data['Adj Close']
-  # print
+SHORTS = ['XIC', 'VUS', 'VSB', 'ZEF', 'VEE',
+          'VEF', 'VRE', 'XEN', 'DSI', 'CLF',
+          'ESGD', 'ESGE', 'REET']
+SYMBOLS = ['XIC.TO', 'VUS.TO', 'VSB.TO', 'ZEF.TO', 'VEE.TO',
+           'VEF.TO', 'VRE.TO', 'XEN.TO', 'DSI', 'CLF.TO',
+           'ESGD', 'ESGE', 'REET']
 
-  # for date, num in zip(list(data.index),list(data['Adj Close'])):
-  #   print date + "," + num
-
-  # print data.to_json(orient="index", date_format='iso')
-  # print data.reset_index()
-
-  data = data.reset_index().to_json(None, orient='records', date_format='iso')
-  data = json.dumps(data, indent=4, separators=(',', ': '))
-  print data
-
-  break
+for i, symbol in enumerate(SYMBOLS):
+    print 'Starting on ' + SHORTS[i]
+    data = pdr.get_data_yahoo(symbols=symbol, start=datetime(2012, 1, 1), end=datetime.today())
+    filename = 'export/' + SHORTS[i] + '-ALL-reduced.csv'
+    with open(filename, 'wb') as csvfile:
+        csvwriter = csv.writer(csvfile, delimiter=',',
+                               quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        for index, row in data.iterrows():
+            time = index.strftime('%Y-%m-%d')
+            adj_close = row['Adj Close']
+            csvwriter.writerow([time, adj_close])
+        csvfile.close()
